@@ -1,5 +1,5 @@
 class BlockAir:
-    value = 0x00 # 0
+    id = 0x00 # 0
     name = "air"
     blocktype = 0x00
     state = 0x00
