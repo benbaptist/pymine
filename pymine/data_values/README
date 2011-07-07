@@ -1,0 +1,8 @@
+Value  Type
+0x00   Block
+0x01   Item
+
+Value  State       Example
+0x00   Non-solid   Air
+0x01   Solid       Stone
+0x02   Fluid       Water
