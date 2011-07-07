@@ -3,6 +3,7 @@ class BlockAir:
     name = "air"
     blocktype = 0x00
     state = 0x00
+    size = [1, 1]
     fall = False
     luminance = 0
     resistance = [0, 0]
