@@ -1,2 +1,2 @@
 class Connection:
-    pass
+	pass

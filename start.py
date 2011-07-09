@@ -3,5 +3,5 @@ from config import config
 from pymine.server import Server
 
 if __name__ == '__main__':
-    server = Server(config)
-    server.listen()
+	server = Server(config)
+	server.listen()
