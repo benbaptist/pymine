@@ -1,22 +1,31 @@
-import sys, socket
+import os, sys, socket
+from logger import Logger
+from connection import Connection
 
 class Server:
 	def __init__(self, config):
 		self.config = config
 		self.abort = False
 		
-		# TODO: Initialize logger
+		self.log = Logger(os.path.expanduser("~/.pymine.log"))
+		self.log.info("Started logging")
+		
+		self.info = {}
+		# TODO: Fill info with init values
 		
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.bind(('', config['port']))
 		self.socket.listen(5)
+		self.log.info("Listening to port %d" % config['port'])
 	
 	def listen(self):
 		while not self.abort:
-			conn, info = self.socket.accept()
+			sock, info = self.socket.accept()
 			addr, id = info
+			self.log.info("Client connecting: %s:%d" % (addr, id))
 			
-			# TODO: Create and start a Connection object
+			conn = Connection(sock, addr, id, self.info)
+			conn.listen()
 		
 		# Loop ended, so abort = True
 		sys.exit(0)
