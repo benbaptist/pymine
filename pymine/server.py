@@ -24,7 +24,7 @@ class Server:
 			addr, id = info
 			self.log.info("Client connecting: %s:%d" % (addr, id))
 			
-			conn = Connection(sock, addr, id, self.info)
+			conn = Connection(sock, addr, id, self.info, self.log)
 			conn.listen()
 		
 		# Loop ended, so abort = True
