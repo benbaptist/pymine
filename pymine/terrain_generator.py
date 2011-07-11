@@ -1,8 +1,8 @@
 class TerrainGenerator:
-	def __init__(self):
-		pass
+	def __init__(self, seed):
+		self.seed = seed
 	
-	def generate(self, seed, x, y): 
+	def generate(self, x, y): 
 		# Generates and returns a chunk. x and y are the chunk coords
 		self.blocks = {}
 		
