@@ -1,4 +1,3 @@
-import binascii
 class Connection:
 	def __init__(self, sock, addr, id, info, log):
 		self.sock = sock
@@ -8,17 +7,15 @@ class Connection:
 		self.log = log
 	
 	def listen(self):
-		self.abort = 0
-		while not self.abort:
-			self.buffer,self.addr= self.sock.recvfrom(1024)
+		while True:
+			buffer = self.sock.recv(1024)
 			
-			if len(self.buffer) == 0:
-				self.abort = 1
-				self.log.info("Disconnected")
+			if len(buffer) == 0:
+				self.log.info("Client %s:%d disconnected" % \
+					(self.addr, self.id))
 				break
 			
-			if not self.abort:
-				self.log.info("Received a message")
-				self.packetID = self.buffer[0:1]
-				
-				self.log.info("Packet ID: %s" % binascii.hexlify(self.packetID))
+			self.log.debug("Received a message")
+			packetID = self.buffer[0:1]
+			
+			self.log.debug("Packet ID: %s" % packetID.encode('hex'))

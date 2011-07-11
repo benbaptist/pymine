@@ -13,6 +13,10 @@ class Logger:
 	def timestr(self):
 		return time.strftime('%c')
 	
+	def debug(self, msg):
+		logstr = "[%s] DEBUG: %s" % (self.timestr(), msg)
+		print logstr
+	
 	def info(self, msg):
 		logstr = "[%s] I: %s" % (self.timestr(), msg)
 		print logstr
