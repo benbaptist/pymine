@@ -9,6 +9,6 @@ class TerrainGenerator:
 		# Create bedrock level
 		b = 0
 		c = 0
-		while b<17:
-			while c<17:
-				self.blocks.append({str(b)+str(c): 7})
+		while b < 17:
+			while c < 17:
+				self.blocks.append({str(b) + str(c): 7})
