@@ -16,6 +16,6 @@ class Connection:
 				break
 			
 			self.log.debug("Received a message")
-			packetID = self.buffer[0:1]
+			packetID = buffer[0:1]
 			
 			self.log.debug("Packet ID: %s" % packetID.encode('hex'))
