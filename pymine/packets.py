@@ -1,6 +1,6 @@
 from logger import Logger
 from hex import HexToDecimal
-import binascii
+import binascii, struct
 class PacketIDs:
 	KEEP_ALIVE = 0x00
 	LOGIN_REQUEST = 0x01
@@ -74,15 +74,41 @@ class PacketParser:
 			if str(PacketIDs.packets[x]) == packetID:
 				log.debug("Packet %s from client" % x)
 				if x == "HANDSHAKE":
-					self.HANDSHAKE(data)
+					self.packet = self.HANDSHAKE(data)
 	def KEEP_ALIVE(data):
 		return [0x00]
 	def LOGIN_REQUEST(data):
 		pass
 	def HANDSHAKE(self,data):
-		length=HexToDecimal(binascii.hexlify(data[1:3])).result*2
-		username_hex = binascii.hexlify(data[4:length])
-		username = data[4:length]
+		length = HexToDecimal(binascii.hexlify(data[1:3])).result*4
+		r = data[4:length]; b = [r[x:x+2] for x in xrange(0,len(r),2)]; c = ""
+		for x in b:
+			c += binascii.a2b_hex(binascii.hexlify(x))
+		c = c.strip('\x00')
+		return [0x02,c]
 		
-		#log.debug("Username: %s" % username)
-		return [0x02,username]
+class PacketMaker:
+	def __init__(self,array,log):
+		self.log = log
+		
+		packetID = array[0] # get packet ID
+		for x in PacketIDs.packets:
+			if str(PacketIDs.packets[x]) == packetID:
+				self.log.debug("Packet %s from server" % x)
+				if x == "HANDSHAKE":
+					self.packet = self.HANDSHAKE(array) 
+	def KEEP_ALIVE(self,array):
+		return ""
+	def LOGIN_REQUEST(self,array):
+		pass
+	def HANDSHAKE(self,array):
+		connection_hash = array[1]
+		connection_hash_ = ""; n = 0
+		for x in connection_hash:
+			if n % 2 == 1:
+				connection_hash_ += "\x00%s" % x
+			else:
+				connection_hash_ += x
+			n += 1
+		num = struct.pack(">h", len(connection_hash))
+		return "\x02%s%s" % (num,connection_hash)
