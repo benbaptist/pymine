@@ -1,5 +1,16 @@
 According to this ancient README file, your only hope is to destroy the original were-car.
 
+Milestones in development:
+- Getting our first packet to be parsed (done)
+- Getting minecraft passed "Logging in..." and "Downloading terrain" and into the 3D view
+- Reading MCRegion files and NBT files
+- Finishing adding every block type
+
+Goals:
+- Allowing plugins to add blocks, entities and mobs, etc.
+- Getting the basics of the server complete BEFORE Minecraft Beta 1.8 is released
+
+
 EVENTS (out of order and not much thought put into):
 BLOCK_PLACE - when a block is placed
 BLOCK_DESTORY - when a block is destroyed 
