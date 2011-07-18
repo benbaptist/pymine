@@ -84,5 +84,5 @@ class PacketParser:
 		username_hex = binascii.hexlify(data[4:length])
 		username = data[4:length]
 		
-		log.debug("Username: %s" % username)
+		#log.debug("Username: %s" % username)
 		return [0x02,username]
