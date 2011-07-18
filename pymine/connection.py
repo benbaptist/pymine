@@ -1,3 +1,4 @@
+from pymine.packets import *
 class Connection:
 	def __init__(self, sock, addr, id, info, log):
 		self.sock = sock
@@ -19,3 +20,6 @@ class Connection:
 			packetID = buffer[0:1]
 			
 			self.log.debug("Packet ID: %s" % packetID.encode('hex'))
+			self.log.debug("Running the PacketParser")
+			
+			parsed = PacketParser(buffer,self.log) #returns an array of each field

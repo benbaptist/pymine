@@ -1,3 +1,6 @@
+from logger import Logger
+from hex import HexToDecimal
+import binascii
 class PacketIDs:
 	KEEP_ALIVE = 0x00
 	LOGIN_REQUEST = 0x01
@@ -56,3 +59,30 @@ class PacketIDs:
 	MAP_DATA = 0x83
 	INCREMENT_STATISTIC = 0xC8
 	DISCONNECT_KICK = 0xFF
+	packets = {
+		'KEEP_ALIVE': '\x00',
+		'LOGIN_REQUEST': '\x01',
+		'HANDSHAKE': '\x02',
+		'CHAT_MESSAGE': '\x03'
+	}
+class PacketParser:
+	def __init__(self,data,log):
+		self.log = log
+		
+		packetID = data[0:1] # get packet ID
+		for x in PacketIDs.packets:
+			if str(PacketIDs.packets[x]) == packetID:
+				log.debug("Packet %s from client" % x)
+				if x == "HANDSHAKE":
+					self.HANDSHAKE(data)
+	def KEEP_ALIVE(data):
+		return [0x00]
+	def LOGIN_REQUEST(data):
+		pass
+	def HANDSHAKE(self,data):
+		length=HexToDecimal(binascii.hexlify(data[1:3])).result*2
+		username_hex = binascii.hexlify(data[4:length])
+		username = data[4:length]
+		
+		log.debug("Username: %s" % username)
+		return [0x02,username]
