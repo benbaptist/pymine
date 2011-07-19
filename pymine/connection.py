@@ -36,6 +36,9 @@ class Connection:
 				a = PacketMaker(["\x02","-"],self.log)
 				print binascii.hexlify(a.packet)
 				self.send(a.packet)
+				self.send(PacketMaker(["\x0d","0","0","0","0","0","0",1],self.log).packet)
+				print binascii.hexlify(PacketMaker(["\x0d","5","5","5","5","5","5",1],self.log).packet)
 			
 			# returns an array of each field
 			# note that strings have 0x00 sandwiched between each character, and it seems to be hard to strip out. this may cause issues with if statements.
+			# 3f:f0:00:00:00:00:00:00:3f:f0:00:00:00:00:00:00:3f:f0:00:00:00:00:00:00:3f:f0:00:00:00:00:00:00:3f:80:00:00:3f:80:00:00:01

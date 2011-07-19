@@ -63,7 +63,8 @@ class PacketIDs:
 		'KEEP_ALIVE': '\x00',
 		'LOGIN_REQUEST': '\x01',
 		'HANDSHAKE': '\x02',
-		'CHAT_MESSAGE': '\x03'
+		'CHAT_MESSAGE': '\x03',
+		'PLAYER_POS': '\x0d'
 	}
 class PacketParser:
 	def __init__(self,data,log):
@@ -97,6 +98,8 @@ class PacketMaker:
 				self.log.debug("Packet %s from server" % x)
 				if x == "HANDSHAKE":
 					self.packet = self.HANDSHAKE(array) 
+				if x == "PLAYER_POS":
+					self.packet = self.PLAYER_POS(array)
 	def KEEP_ALIVE(self,array):
 		return ""
 	def LOGIN_REQUEST(self,array):
@@ -112,3 +115,14 @@ class PacketMaker:
 			n += 1
 		num = struct.pack(">h", len(connection_hash))
 		return "\x02%s%s" % (num,connection_hash)
+	def PLAYER_POS(self,array):
+		x = struct.pack(">d", len(array[1]))
+		y = struct.pack(">d", len(array[2]))
+		stance = struct.pack(">d", len(array[3]))
+		z = struct.pack(">d", len(array[4]))
+		yaw = struct.pack(">f", len(array[5]))
+		pitch = struct.pack(">f", len(array[6]))
+		on_ground = array[7]
+		if on_ground == 0: on_ground = "\x00"
+		else: on_ground = "\x01"
+		return "\x0d%s.%s.%s.%s.%s.%s.%s" % (x, stance, y, z, yaw, pitch, on_ground)

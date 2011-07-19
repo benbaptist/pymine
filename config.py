@@ -2,7 +2,7 @@
 
 config = {
 	# === network === #
-	'port': 25564,
+	'port': 25565,
 	
 	# ==== world ==== #
 	'main-world': 'world',
