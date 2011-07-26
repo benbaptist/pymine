@@ -3,6 +3,7 @@ from logger import Logger
 from connection import Connection
 
 class Server:
+	protocol_version = 14
 	def __init__(self, config):
 		self.config = config
 		self.abort = False

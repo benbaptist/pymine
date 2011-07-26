@@ -76,12 +76,28 @@ class PacketParser:
 				log.debug("Packet %s from client" % x)
 				if x == "HANDSHAKE":
 					self.packet = self.HANDSHAKE(data)
-	def KEEP_ALIVE(data):
+				if x == "LOGIN_REQUEST":
+					self.packet = self.LOGIN_REQUEST(data)
+	def hexint(self, data):
+		return HexToDecimal(binascii.hexlify(data)).result	
+	def string16(self, data):
+		r = ""
+		for x in data: 
+			if binascii.hexlify(x) != "00":
+				r += binascii.unhexlify(binascii.hexlify(x))
+		return r
+	def KEEP_ALIVE(self,data):
 		return [0x00]
-	def LOGIN_REQUEST(data):
-		pass
+	def LOGIN_REQUEST(self,data):
+		protocol_version = self.hexint(data[1:5]) # protocol version, which is currently 14 (int)
+		
+		#username_len = HexToDecimal(binascii.hexlify(data[6:8])).result * 4 # length of the username (short)
+		username_len = self.hexint(data[6:8]) * 4
+		username = self.string16(data[8:username_len]) # username itself (string16)
+		
+		return [0x01, protocol_version, username]
 	def HANDSHAKE(self,data):
-		length = HexToDecimal(binascii.hexlify(data[1:3])).result*4
+		length = HexToDecimal(binascii.hexlify(data[1:3])).result * 4
 		r = data[4:length]; b = [r[x:x+2] for x in xrange(0,len(r),2)]; c = ""
 		for x in b:
 			c += binascii.a2b_hex(binascii.hexlify(x))
@@ -91,20 +107,39 @@ class PacketParser:
 class PacketMaker:
 	def __init__(self,array,log):
 		self.log = log
+		self.hexlify = binascii.hexlify
+		self.unhexlify = binascii.unhexlify
 		
 		packetID = array[0] # get packet ID
 		for x in PacketIDs.packets:
 			if str(PacketIDs.packets[x]) == packetID:
 				self.log.debug("Packet %s from server" % x)
+				if x == "LOGIN_REQUEST":
+					self.packet = self.LOGIN_REQUEST(array)
 				if x == "HANDSHAKE":
 					self.packet = self.HANDSHAKE(array) 
 				if x == "PLAYER_POS":
 					self.packet = self.PLAYER_POS(array)
-	def KEEP_ALIVE(self,array):
-		return ""
-	def LOGIN_REQUEST(self,array):
-		pass
-	def HANDSHAKE(self,array):
+	
+	# FIELD TYPE CONVERTERS
+	def double(self, data):
+		return self.unhexlify(self.hexlify(struct.pack(">d", data)))
+	def floathex(self, data):
+		return self.unhexlify(self.hexlify(struct.pack(">f", data)))
+	def boolhex(self, data):
+		if data == 1:
+			return "\x01"
+		else:
+			return "\x00"
+
+	# PACKET MAKERS
+	def KEEP_ALIVE(self, array): #00
+		return [0x00]
+
+	def LOGIN_REQUEST(self, array): #01
+		return "\x01%s" % array[1]
+
+	def HANDSHAKE(self,array): #02
 		connection_hash = array[1]
 		connection_hash_ = ""; n = 0
 		for x in connection_hash:
@@ -114,15 +149,19 @@ class PacketMaker:
 				connection_hash_ += x
 			n += 1
 		num = struct.pack(">h", len(connection_hash))
-		return "\x02%s%s" % (num,connection_hash)
-	def PLAYER_POS(self,array):
-		x = struct.pack(">d", len(array[1]))
-		y = struct.pack(">d", len(array[2]))
-		stance = struct.pack(">d", len(array[3]))
-		z = struct.pack(">d", len(array[4]))
-		yaw = struct.pack(">f", len(array[5]))
-		pitch = struct.pack(">f", len(array[6]))
-		on_ground = array[7]
-		if on_ground == 0: on_ground = "\x00"
-		else: on_ground = "\x01"
+		numf = binascii.hexlify(num)
+		numf = binascii.unhexlify(numf)
+		return "\x02%s%s" % (numf,connection_hash)
+	
+	def PLAYER_POS(self,array): # 0D 
+		hexlify = self.hexlify
+		
+		x = self.double(array[1])
+		y = self.double(array[2])
+		stance = self.double(array[3])
+		z = self.double(array[4])
+		yaw = self.floathex(array[5])
+		pitch = self.floathex(array[6])
+		on_ground = self.boolhex(array[7])
+		
 		return "\x0d%s.%s.%s.%s.%s.%s.%s" % (x, stance, y, z, yaw, pitch, on_ground)
