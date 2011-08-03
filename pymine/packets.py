@@ -132,11 +132,14 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 					self.packet = self.HANDSHAKE(array) 
 				if x == "PLAYER_POS":
 					self.packet = self.PLAYER_POS(array)
+				print len(self.packet)
 	
 	# FIELD TYPE CONVERTERS
 	def double(self, data):
-		return self.unhexlify(self.hexlify(struct.pack(">d", data)))
+		z = struct.pack(">d", data)
+		return z
 	def floathex(self, data):
+		print len(self.unhexlify(self.hexlify(struct.pack(">f", data))))
 		return self.unhexlify(self.hexlify(struct.pack(">f", data)))
 	def boolhex(self, data):
 		if data == 1:
@@ -168,12 +171,14 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 	def PLAYER_POS(self,array): # 0D 
 		hexlify = self.hexlify
 		
-		x = self.double(array[1])
-		y = self.double(array[2])
-		stance = self.double(array[3])
-		z = self.double(array[4])
-		yaw = self.floathex(array[5])
-		pitch = self.floathex(array[6])
-		on_ground = self.boolhex(array[7])
+		x = self.double(array[1]) # z coord
+		y = self.double(array[2]) # y coord
+		s = self.double(array[3]) # stance
+		z = self.double(array[4]) # z coord
+		yaw = self.floathex(array[5]) # yaw hoo
+		pitch = self.floathex(array[6]) # pitcher
+		on_ground = self.boolhex(array[7]) # oh yessery
 		
-		return "\x0d%s.%s.%s.%s.%s.%s.%s" % (x, stance, y, z, yaw, pitch, on_ground)
+		print x
+		
+		return "\x0d%s%s%s%s%s%s%s" % (x, s, y, z, yaw, pitch, on_ground)

@@ -23,7 +23,6 @@ class Connection:
 		while True:
 			buffer = self.sock.recv(1024)
 			print self.hexlify(buffer)
-			print lol
 			
 			if len(buffer) == 0:
 				self.log.info("Client %s:%d disconnected" % \
@@ -44,7 +43,7 @@ class Connection:
 				
 				self.send(PacketMaker(["\x01", int(8000)], self.log).packet)	
 				
-				#self.send(PacketMaker(["\x0d", 2,2,2,2,2,2,2], self.log).packet)	
+				self.send(PacketMaker(["\x0d", 2,2,2,2,2,2,2], self.log).packet)	
 			
 			# 0x02: HANDSHAKE
 			if parsed[0] == 2:
