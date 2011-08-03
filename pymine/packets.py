@@ -67,7 +67,7 @@ class PacketIDs:
 		'PLAYER_POS': '\x0d'
 	}
 class PacketParser:
-	def __init__(self,data,log):
+	def __init__(self, data, log):
 		self.log = log
 		
 		packetID = data[0:1] # get packet ID
@@ -78,6 +78,7 @@ class PacketParser:
 					self.packet = self.HANDSHAKE(data)
 				if x == "LOGIN_REQUEST":
 					self.packet = self.LOGIN_REQUEST(data)
+	# FIELD TYPES
 	def hexint(self, data):
 		return HexToDecimal(binascii.hexlify(data)).result	
 	def string16(self, data):
@@ -86,25 +87,36 @@ class PacketParser:
 			if binascii.hexlify(x) != "00":
 				r += binascii.unhexlify(binascii.hexlify(x))
 		return r
-	def KEEP_ALIVE(self,data):
+	def getRidOfZero(self, data):
+		r = ""
+		for x in data:
+			if binascii.hexlify(x) != "00":
+				r += x
+		return x
+	
+	# PACKET PARSERS
+	def KEEP_ALIVE(self, data):
 		return [0x00]
-	def LOGIN_REQUEST(self,data):
-		protocol_version = self.hexint(data[1:5]) # protocol version, which is currently 14 (int)
-		
-		#username_len = HexToDecimal(binascii.hexlify(data[6:8])).result * 4 # length of the username (short)
+	def LOGIN_REQUEST(self, data):
+		protocol_version = self.hexint(data[1:5]) # pv, which is currently 14 (int)
 		username_len = self.hexint(data[6:8]) * 4
 		username = self.string16(data[8:username_len]) # username itself (string16)
 		
+		print data[8:username_len]
+		
+		if self.getRidOfZero(data[8:username_len]) == "benbaptist":
+			print "poo"
+		
 		return [0x01, protocol_version, username]
-	def HANDSHAKE(self,data):
+	def HANDSHAKE(self, data):
 		length = HexToDecimal(binascii.hexlify(data[1:3])).result * 4
 		r = data[4:length]; b = [r[x:x+2] for x in xrange(0,len(r),2)]; c = ""
 		for x in b:
 			c += binascii.a2b_hex(binascii.hexlify(x))
 		c = c.strip('\x00')
 		return [0x02,c]
-		
-class PacketMaker:
+
+class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 	def __init__(self,array,log):
 		self.log = log
 		self.hexlify = binascii.hexlify
