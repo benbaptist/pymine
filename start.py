@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import time, sys, signal
 from config import config
 from pymine.server import Server

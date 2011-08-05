@@ -136,23 +136,47 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 	
 	# FIELD TYPE CONVERTERS
 	def double(self, data):
-		z = struct.pack(">d", data)
-		return z
+		z = format(data, "08")
+		a = ""
+		
+		for x in z:
+			a += chr(int(x))
+
+		return a
 	def floathex(self, data):
-		print len(self.unhexlify(self.hexlify(struct.pack(">f", data))))
-		return self.unhexlify(self.hexlify(struct.pack(">f", data)))
+		#print len(self.unhexlify(self.hexlify(struct.pack(">f", data))))
+		#return self.unhexlify(self.hexlify(struct.pack(">f", data)))
+		f = format(data, "04")
+		a = ""
+		
+		for x in f:
+			a += chr(int(x))
+		
+		print a.encode('hex')
+		
+		return a
 	def boolhex(self, data):
 		if data == 1:
 			return "\x01"
 		else:
 			return "\x00"
-
+	def longhex(self, data):
+		f = format(data, "08")
+		a = ""
+		
+		for x in f:
+			a += chr(int(x))
+		
+		print a.encode('hex')
+		
+		return a
+		
 	# PACKET MAKERS
 	def KEEP_ALIVE(self, array): #00
 		return [0x00]
 
 	def LOGIN_REQUEST(self, array): #01
-		return "\x01%s" % array[1]
+		return "\x01%s\x00\x00%s%s" % (array[1], self.longhex(array[2]), array[3])
 
 	def HANDSHAKE(self,array): #02
 		connection_hash = array[1]
@@ -170,6 +194,7 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 	
 	def PLAYER_POS(self,array): # 0D 
 		hexlify = self.hexlify
+		a = ""
 		
 		x = self.double(array[1]) # z coord
 		y = self.double(array[2]) # y coord
@@ -179,6 +204,16 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 		pitch = self.floathex(array[6]) # pitcher
 		on_ground = self.boolhex(array[7]) # oh yessery
 		
-		print x
+		a = "\x0d"
+		a += x
+		a += y
+		a += s
+		a += z
+		a += yaw
+		a += pitch
+		a += on_ground
 		
+		#print a
+		
+		#return a
 		return "\x0d%s%s%s%s%s%s%s" % (x, s, y, z, yaw, pitch, on_ground)

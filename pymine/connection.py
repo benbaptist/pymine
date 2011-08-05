@@ -19,10 +19,11 @@ class Connection:
 	def send(self, data):
 		self.sock.send(data, 1024)
 		self.log.debug("Server sent packet to %s: %s" % (self.addr, data))
+		print "SEND: ",data.encode('hex')
 	def listen(self):
 		while True:
 			buffer = self.sock.recv(1024)
-			print self.hexlify(buffer)
+			print "RECEIVE: ",buffer.encode('hex')
 			
 			if len(buffer) == 0:
 				self.log.info("Client %s:%d disconnected" % \
@@ -41,9 +42,9 @@ class Connection:
 				#	self.log.info("%s has a protocol mismatch!" % self.addr)
 				prococol_version = parsed[1]
 				
-				self.send(PacketMaker(["\x01", int(8000)], self.log).packet)	
+				self.send(PacketMaker(["\x01", int(8000), 50, 0], self.log).packet)	
 				
-				self.send(PacketMaker(["\x0d", 2,2,2,2,2,2,2], self.log).packet)	
+				self.send(PacketMaker(["\x0d", 2,2,2,2,2,2,2], self.log).packet)
 			
 			# 0x02: HANDSHAKE
 			if parsed[0] == 2:
