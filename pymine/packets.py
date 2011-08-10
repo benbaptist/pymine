@@ -114,9 +114,9 @@ class PacketParser:
 		for x in b:
 			c += binascii.a2b_hex(binascii.hexlify(x))
 		c = c.strip('\x00')
-		return [0x02,c]
+		return [0x02, c]
 
-class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
+class PacketMaker: # this class is used to make classes
 	def __init__(self,array,log):
 		self.log = log
 		self.hexlify = binascii.hexlify
@@ -127,12 +127,13 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 			if str(PacketIDs.packets[x]) == packetID:
 				self.log.debug("Packet %s from server" % x)
 				if x == "LOGIN_REQUEST":
-					self.packet = self.LOGIN_REQUEST(array)
+					self.packet = self.LOGIN_REQUEST(array).decode('hex')
 				if x == "HANDSHAKE":
-					self.packet = self.HANDSHAKE(array) 
+					self.packet = self.HANDSHAKE(array).decode('hex')
 				if x == "PLAYER_POS":
-					self.packet = self.PLAYER_POS(array)
-				print len(self.packet)
+					self.packet = self.PLAYER_POS(array).decode('hex')
+				print "Whoo: ", self.packet
+				print "hmm: ",len(self.packet)
 	
 	# FIELD TYPE CONVERTERS
 	def double(self, data):
@@ -167,32 +168,73 @@ class PacketMaker: # MAKIN PACKET WITH MY SOCKET!
 		for x in f:
 			a += chr(int(x))
 		
-		print a.encode('hex')
+		return a.encode('hex')
+	def LE_BE(self, data): # converts little endian to big endian. reverses text too.
+		a = str(data)
+		b = ""
 		
-		return a
+		for x in a:
+			b = x + b
 		
+		return b
+	def int(self, data, i): # convert into a proper INT
+		a = self.LE_BE(format(data,i)) # little endian to big endian
+		print "int_a : ", a
+		b = ""
+		
+		for x in a:
+			b += hex(len(x)).encode('hex')
+		print "int_b : ",b
+		print "int_b_encode : ", b.encode('hex')
+		return b.encode('hex')
+	def realint(self, data):
+		return format(int(data), "04")
+	def long(self, data):
+		a = format(data, "08")
+		
+		return self.int(a)
+	def string(self, data):
+		return data.encode('hex')
 	# PACKET MAKERS
 	def KEEP_ALIVE(self, array): #00
-		return [0x00]
+		return "00"
 
 	def LOGIN_REQUEST(self, array): #01
-		return "\x01%s\x00\x00%s%s" % (array[1], self.longhex(array[2]), array[3])
+		EntityID = array[1]
+		EntityIDHex = self.int(EntityID, "04")
+		
+		MapSeed = array[2]
+		MapSeedHex = self.long(MapSeed)
+		
+		a = "01" # packet ID
+		a += EntityIDHex # entity ID for the player
+		a += "0000" # unknown field name that isn't used
+		a += MapSeedHex
+		a += "00"
+		
+		print a
+		
+		return a
+		#return "\x01%s\x00\x00%s%s" % (array[1], self.longhex(array[2]), array[3])
 
-	def HANDSHAKE(self,array): #02
-		connection_hash = array[1]
-		connection_hash_ = ""; n = 0
-		for x in connection_hash:
-			if n % 2 == 1:
-				connection_hash_ += "\x00%s" % x
-			else:
-				connection_hash_ += x
-			n += 1
-		num = struct.pack(">h", len(connection_hash))
-		numf = binascii.hexlify(num)
-		numf = binascii.unhexlify(numf)
-		return "\x02%s%s" % (numf,connection_hash)
+	def HANDSHAKE(self, array): #02
+		a = ""
+		
+		ConnectionHash = array[1]
+		ConnectionHashLen = self.int(len(ConnectionHash), "04")
+		ConnectionHashHex = self.string(ConnectionHash)
+		
+		print "moo: ",len(ConnectionHash)
+		print "Cow: ",self.int(len(ConnectionHash), "04")
+		print "Hai: ",self.int(50, "04")
+		
+		a += "02" # packet ID
+		a += ConnectionHashLen # length for upcoming string16
+		a += ConnectionHashHex
+		
+		return a
 	
-	def PLAYER_POS(self,array): # 0D 
+	def PLAYER_POS(self, array): # 0D 
 		hexlify = self.hexlify
 		a = ""
 		
