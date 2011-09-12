@@ -18,42 +18,37 @@ class Connection:
 		self.sock.close()
 	def send(self, data):
 		self.sock.send(data, 1024)
-		self.log.debug("Server sent packet to %s: %s" % (self.addr, data))
-		print "SEND: ",data.encode('hex')
+		# self.log.debug("Server sent packet to %s: %s" % (self.addr, data))
+	def recv(self, num):
+		if num < 0:
+			result = self.buffer
+		else:
+			result = self.buffer[0:num]
+			self.buffer = self.buffer[num:]
+		return result
+	def packetSend(self, type, args):
+		packet = ""
+		if type == 2:
+			ConnectionHash = args[0]
+			packet = "\x02\x00\x01%s" % ConnectionHash
+		self.send(packet)
 	def listen(self):
 		while True:
-			buffer = self.sock.recv(1024)
-			print "RECEIVE: ",buffer.encode('hex')
+			self.buffer = self.sock.recv(1024)
+			self.log.debug("Received a message")
 			
-			if len(buffer) == 0:
+			if len(self.buffer) == 0:
 				self.log.info("Client %s:%d disconnected" % \
 					(self.addr, self.id))
 				break
+			type = self.recv(1)
 			
-			self.log.debug("Received a message")
-			self.log.debug("Running the PacketParser")
+			if type == '\x02': # PACKET: HANDSHAKE
+				UsernameLength = self.recv(2)
+				Username = self.buffer
+				self.log.info("%s:%d logged in as %s" % \
+					(self.addr, self.id, Username))
+				self.packetSend(2, ['-'])
 			
-			parsed = PacketParser(buffer, self.log).packet 
-			self.log.debug("Packet ID: %s" % parsed[0])
-			
-			# 0x01: LOGIN_REQUEST
-			if parsed[0] == 1:
-				#if parsed[1] != Server.protocol_version:
-				#	self.log.info("%s has a protocol mismatch!" % self.addr)
-				prococol_version = parsed[1]
+			# if type == '\x01':
 				
-				self.send(PacketMaker(["\x01", int(8000), 50, 0], self.log).packet)	
-				
-				self.send(PacketMaker(["\x0d", 2,2,2,2,2,2,2], self.log).packet)
-			
-			# 0x02: HANDSHAKE
-			if parsed[0] == 2:
-				self.log.info("%s is logging in as %s" % (self.addr, parsed[1]))
-				self.player = Player(self.addr, self.log)
-				self.player.username = parsed[1]
-				self.player.entityID = random.randrange(0, 9999)
-				
-				self.send(PacketMaker(["\x02", "-"], self.log).packet+"\n")
-			# returns an array of each field
-			# note that strings have 0x00 sandwiched between each character, and it seems to be hard to strip out. this may cause issues with if statements.
-			# 3f:f0:00:00:00:00:00:00:3f:f0:00:00:00:00:00:00:3f:f0:00:00:00:00:00:00:3f:f0:00:00:00:00:00:00:3f:80:00:00:3f:80:00:00:01

@@ -19,6 +19,7 @@ class Server:
 		
 		try:
 			self.socket.bind(('', config['port']))
+			self.isReady = 1
 		except:
 			self.log.error("Unable to bind to port! Binding to next available port...")
 			self.socket.bind(('', config['port'] + 1))
@@ -29,8 +30,8 @@ class Server:
 		self.log.info("Listening to port %d" % config['port'])
 	def close(self):
 		self.socket.close()
-	
 	def listen(self):
+		print "Tetseiotjsidjfdosijf"
 		while not self.abort:
 			sock, info = self.socket.accept()
 			addr, id = info
