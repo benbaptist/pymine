@@ -20,7 +20,7 @@ class Logger:
 	def info(self, msg):
 		logstr = "[%s] I: %s" % (self.timestr(), msg)
 		print logstr
-		self.log.write(logstr + "\n")
+		self.log.write(logstr.encode('ascii', 'ignore') + "\n")
 	
 	def warning(self, msg):
 		logstr = "[%s] W: %s" % (self.timestr(), msg)
